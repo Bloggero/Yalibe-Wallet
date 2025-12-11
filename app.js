@@ -92,6 +92,7 @@ let currentLang = localStorage.getItem("yalibe_lang") || "en";
 let pendingTo = null;
 let pendingAmount = null;
 
+//get elements
 const headerTitle = document.getElementById("headerTitle");
 const headerSubtitle = document.getElementById("headerSubtitle");
 const historyButton = document.getElementById("historyButton");
@@ -129,6 +130,9 @@ const modalCheckboxLabel = document.getElementById("modalCheckboxLabel");
 const modalConfirmCheck = document.getElementById("modalConfirmCheck");
 const modalConfirm = document.getElementById("modalConfirm");
 const modalCancel = document.getElementById("modalCancel");
+const loadingModal = document.getElementById("loadingModal");
+const loadingTitle = document.getElementById("loadingTitle");
+const loadingMessage = document.getElementById("loadingMessage");
 
 const errorModal = document.getElementById("errorModal");
 const errorModalTitle = document.getElementById("errorModalTitle");
@@ -317,41 +321,86 @@ function closeErrorModal() {
   errorModal.classList.add("hidden");
 }
 
+function openLoadingModal(title = "Procesando…", message = "Firmando transacción") {
+  loadingTitle.textContent = title;
+  loadingMessage.textContent = message;
+  loadingModal.classList.remove("hidden");
+  loadingModal.classList.add("active");
+}
+
+function closeLoadingModal() {
+  loadingModal.classList.remove("active");
+  loadingModal.classList.add("hidden");
+}
+
 errorModalClose.addEventListener("click", closeErrorModal);
 
 
 
 async function sendTokens(to, amount) {
   const t = translations[currentLang];
+
   if (!tokenContract || !signer) {
     openErrorModal("errorNoMetamask");
     return;
   }
+
   try {
-    setAlert("info", t.alertTxSending);
+    // 1️⃣ Abre modal de carga (firmando en MetaMask)
+    openLoadingModal(
+      t.alertTxSending, 
+      "Firmando la transacción en MetaMask…"
+    );
+
     const amountWei = ethers.utils.parseUnits(amount, tokenDecimals);
     const tx = await tokenContract.transfer(to, amountWei);
-    setAlert("info", t.alertTxPending);
+
+    // 2️⃣ Cambia el mensaje a "transacción enviada"
+    openLoadingModal(
+      t.alertTxPending,
+      "Esperando confirmación de la red…"
+    );
+
     const receipt = await tx.wait();
+
+    // 3️⃣ Cerrar modal de carga
+    closeLoadingModal();
+
     if (receipt.status === 1) {
+      // 4️⃣ Guardar en historial
       saveTx({
         to,
         amount,
         date: new Date().toLocaleString(),
         explorer: `https://sepolia.etherscan.io/tx/${tx.hash}`
       });
+
+      // 5️⃣ Notificación visual
       setAlert("success", t.alertTxSuccess);
+
+      // refrescar balance
       await loadBalance();
+
+      // limpiar inputs
       amountInput.value = "";
       toAddressInput.value = "";
+
     } else {
       setAlert("error", t.alertTxFailed);
+      openErrorModal(t.alertTxFailed, false);
     }
+
   } catch (error) {
     console.error(error);
-    setAlert("error", t.alertTxError);
+
+    // Cerrar modal si sigue abierto
+    closeLoadingModal();
+
+    // Mensaje elegante en el modal de error
+    openErrorModal(t.alertTxError, false);
   }
 }
+
 
 async function handleTransfer(event) {
   event.preventDefault();
