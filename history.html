@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Historial de transacciones · Yalibe</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="app">
+
+    <header class="header">
+      <div>
+        <h1>Historial de transacciones</h1>
+        <p class="subtitle">Transacciones realizadas desde esta wallet.</p>
+      </div>
+
+      <div class="header-actions">
+        <a href="index.html" class="btn-secondary">← Regresar</a>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="card card-full">
+        <h2>Últimos movimientos</h2>
+
+        <div id="txHistoryEmpty" class="label" style="margin-top: 6px;">
+          Aún no hay transacciones registradas.
+        </div>
+
+        <div id="txHistoryList" class="tx-list hidden"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>Yalibe · Fase 1 — Wallet DApp</p>
+    </footer>
+  </div>
+
+<script type="module" src="history.js"></script>
+
+</body>
+</html>

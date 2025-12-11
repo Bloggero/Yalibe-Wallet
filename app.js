@@ -1,3 +1,5 @@
+import { saveTx, longAddress } from "./utils.js";
+
 const TOKEN_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 const EXPECTED_CHAIN_ID = null;
 
@@ -92,6 +94,7 @@ let pendingAmount = null;
 
 const headerTitle = document.getElementById("headerTitle");
 const headerSubtitle = document.getElementById("headerSubtitle");
+const historyButton = document.getElementById("historyButton");
 const connectButton = document.getElementById("connectButton");
 const connectionTitle = document.getElementById("connectionTitle");
 const connectionStatus = document.getElementById("connectionStatus");
@@ -131,6 +134,10 @@ const errorModal = document.getElementById("errorModal");
 const errorModalTitle = document.getElementById("errorModalTitle");
 const errorModalMessage = document.getElementById("errorModalMessage");
 const errorModalClose = document.getElementById("errorModalClose");
+
+historyButton.addEventListener("click", () => {
+  window.location.href = "history.html";
+});
 
 
 function applyTranslations() {
@@ -200,9 +207,6 @@ function clearAlert() {
 function shortenAddress(addr) {
   if (!addr) return "—";
   return addr.slice(0, 6) + "..." + addr.slice(-4);
-}
-function longAddress(addr) {
-  return addr.slice(0, 12) + "..." + addr.slice(-6);
 }
 
 async function connectWallet() {
@@ -330,6 +334,12 @@ async function sendTokens(to, amount) {
     setAlert("info", t.alertTxPending);
     const receipt = await tx.wait();
     if (receipt.status === 1) {
+      saveTx({
+        to,
+        amount,
+        date: new Date().toLocaleString(),
+        explorer: `https://sepolia.etherscan.io/tx/${tx.hash}`
+      });
       setAlert("success", t.alertTxSuccess);
       await loadBalance();
       amountInput.value = "";
