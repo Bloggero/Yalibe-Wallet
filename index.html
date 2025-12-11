@@ -34,12 +34,23 @@
         </p>
         <div class="info-row">
           <span id="accountLabel" class="label">Cuenta:</span>
-          <span id="accountAddress" class="value value-mono">—</span>
+        
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span id="accountAddress" class="value value-mono">—</span>
+            <button id="copyAddressBtn" class="btn-copy">Copiar</button>
+          </div>
         </div>
+
         <div class="info-row">
           <span id="networkLabel" class="label">Red:</span>
           <span id="networkName" class="value">—</span>
         </div>
+        <div id="wrongNetworkBox" class="hidden" style="margin-top:10px;">
+          <button id="switchNetworkBtn" class="btn-secondary">
+            Cambiar a la red correcta
+          </button>
+          </div>
+
       </section>
 
       <section class="card">
@@ -137,7 +148,7 @@
       </div>
     </div>
   </div>
-  
+
   <div id="loadingModal" class="modal hidden">
     <div class="modal-backdrop"></div>
 

@@ -1,7 +1,7 @@
 import { saveTx, longAddress } from "./utils.js";
 
 const TOKEN_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-const EXPECTED_CHAIN_ID = null;
+const EXPECTED_CHAIN_ID = "0x7a69";
 
 const TOKEN_ABI = [
   "function name() view returns (string)",
@@ -44,7 +44,9 @@ const translations = {
     alertTxError: "Ocurrió un error al enviar la transacción.",
     errorNoMetamask: "No se detectó MetaMask. Instálalo para usar la DApp.",
     errorInvalidAddress: "La dirección de destino no es válida.",
-    errorInvalidAmount: "Ingresa una cantidad mayor a 0."
+    errorInvalidAmount: "Ingresa una cantidad mayor a 0.",
+    copyButton: "Copiar",
+    copiedButton: "Copiado ✔"
   },
   en: {
     headerTitle: "Yalibe Wallet",
@@ -78,7 +80,9 @@ const translations = {
     alertTxError: "An error occurred while sending the transaction.",
     errorNoMetamask: "MetaMask was not detected. Install it to use the DApp.",
     errorInvalidAddress: "The destination address is not valid.",
-    errorInvalidAmount: "Enter an amount greater than 0."
+    errorInvalidAmount: "Enter an amount greater than 0.",
+    copyButton: "Copy",
+    copiedButton: "Copied ✔"
   }
 };
 
@@ -119,6 +123,10 @@ const sendButton = document.getElementById("sendButton");
 const footerText = document.getElementById("footerText");
 const transferAlert = document.getElementById("transferAlert");
 const langButtons = document.querySelectorAll(".lang-btn");
+const copyAddressBtn = document.getElementById("copyAddressBtn");
+const wrongNetworkBox = document.getElementById("wrongNetworkBox");
+const switchNetworkBtn = document.getElementById("switchNetworkBtn");
+
 
 const confirmModal = document.getElementById("confirmModal");
 const modalTitle = document.getElementById("modalTitle");
@@ -167,6 +175,8 @@ function applyTranslations() {
   modalCheckboxLabel.textContent = t.modalCheckbox;
   modalConfirm.textContent = t.modalConfirm;
   modalCancel.textContent = t.modalCancel;
+  copyAddressBtn.textContent = t.copyButton;
+
   if (!currentAccount) {
     setConnectionStatus("disconnected");
   }
@@ -236,9 +246,15 @@ async function connectWallet() {
 
     if (EXPECTED_CHAIN_ID && network.chainId !== parseInt(EXPECTED_CHAIN_ID, 16)) {
       setConnectionStatus("wrongNetwork");
+    
+      wrongNetworkBox.classList.remove("hidden");
+      switchNetworkBtn.disabled = false;
     } else {
       setConnectionStatus("connected");
+    
+      wrongNetworkBox.classList.add("hidden");
     }
+
 
     accountAddress.textContent = shortenAddress(currentAccount);
     tokenContract = new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, signer);
@@ -251,6 +267,45 @@ async function connectWallet() {
     setConnectionStatus("error");
   }
 }
+
+async function switchToCorrectNetwork() {
+  try {
+    await window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: EXPECTED_CHAIN_ID }]
+    });
+
+    window.location.reload();
+
+} catch (switchError) {
+
+  if (switchError.code === 4902) {
+    // La red NO está agregada en MetaMask → Agregarla
+    await window.ethereum.request({
+      method: "wallet_addEthereumChain",
+      params: [
+        {
+          chainId: EXPECTED_CHAIN_ID,
+          chainName: "Sepolia Testnet",
+          rpcUrls: ["https://rpc2.sepolia.org"]
+        }
+      ]
+    });
+
+    window.location.reload();
+
+  } else {
+    openErrorModal("No se pudo cambiar de red. Intenta manualmente.", false);
+  }
+
+}
+
+}
+
+
+
+
+
 
 async function loadTokenMetadata() {
   try {
@@ -431,6 +486,7 @@ async function handleTransfer(event) {
 }
 
 connectButton.addEventListener("click", connectWallet);
+switchNetworkBtn.addEventListener("click", switchToCorrectNetwork);
 refreshBalanceBtn.addEventListener("click", loadBalance);
 transferForm.addEventListener("submit", handleTransfer);
 
@@ -494,6 +550,53 @@ langButtons.forEach((btn) => {
     btn.classList.remove("active");
   }
 });
+
+function copyToClipboard(text) {
+  const t = translations[currentLang];
+
+  // https
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      copyAddressBtn.textContent = t.copiedButton;
+      copyAddressBtn.classList.add("copied");
+
+      setTimeout(() => {
+        copyAddressBtn.textContent = t.copyButton;
+        copyAddressBtn.classList.remove("copied");
+      }, 1200);
+    });
+  } 
+  // http, old browsers
+  else {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    try {
+      document.execCommand("copy");
+      copyAddressBtn.textContent = t.copiedButton;
+      copyAddressBtn.classList.add("copied");
+
+      setTimeout(() => {
+        copyAddressBtn.textContent = t.copyButton;
+        copyAddressBtn.classList.remove("copied");
+      }, 1200);
+    } finally {
+      document.body.removeChild(textarea);
+    }
+  }
+}
+
+
+copyAddressBtn.addEventListener("click", () => {
+  if (currentAccount) {
+    copyToClipboard(currentAccount);
+  }
+});
+
+
+
 
 applyTranslations();
 setConnectionStatus("disconnected");

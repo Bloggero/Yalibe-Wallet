@@ -405,3 +405,32 @@ body {
     transform: rotate(360deg);
   }
 }
+/*//*/
+.btn-copy {
+  background: #e5e7eb;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #374151;
+}
+
+.btn-copy:hover {
+  background: #d1d5db;
+}
+
+.btn-copy.copied {
+  background: #4ade80 !important;
+  color: white !important;
+}
+
+#wrongNetworkBox {
+  text-align: right;
+}
+
+#switchNetworkBtn {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+}
