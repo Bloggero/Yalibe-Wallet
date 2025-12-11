@@ -5,45 +5,50 @@
   <title>Yalibe Wallet</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="style.css" />
-  <!-- Ethers.js v5 -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 </head>
 <body>
   <div class="app">
     <header class="header">
       <div>
-        <h1>Yalibe Wallet</h1>
-        <p class="subtitle">Conecta tu wallet y consulta tus YAL de forma segura.</p>
+        <h1 id="headerTitle">Yalibe Wallet</h1>
+        <p id="headerSubtitle" class="subtitle">Conecta tu wallet y consulta tus YAL de forma segura.</p>
       </div>
-      <button id="connectButton" class="btn-primary">
-        Conectar MetaMask
-      </button>
+      <div class="header-actions">
+        <div class="lang-switch">
+          <button class="lang-btn active" data-lang="es">ES</button>
+          <button class="lang-btn" data-lang="en">EN</button>
+        </div>
+        <button id="connectButton" class="btn-primary">
+          Conectar MetaMask
+        </button>
+      </div>
     </header>
 
     <main class="main">
       <section class="card">
-        <h2>Estado de conexión</h2>
+        <h2 id="connectionTitle">Estado de conexión</h2>
         <p id="connectionStatus" class="status status-warning">
           No conectado
         </p>
         <div class="info-row">
-          <span class="label">Cuenta:</span>
+          <span id="accountLabel" class="label">Cuenta:</span>
           <span id="accountAddress" class="value value-mono">—</span>
         </div>
         <div class="info-row">
-          <span class="label">Red:</span>
+          <span id="networkLabel" class="label">Red:</span>
           <span id="networkName" class="value">—</span>
         </div>
       </section>
 
       <section class="card">
-        <h2>Balance de Yalibe (YAL)</h2>
+        <h2 id="balanceTitle">Balance de Yalibe (YAL)</h2>
         <div class="info-row">
-          <span class="label">Token:</span>
+          <span id="tokenLabel" class="label">Token:</span>
           <span id="tokenSymbol" class="value">YAL</span>
         </div>
         <div class="balance-row">
-          <span class="balance-label">Tu balance:</span>
+          <span id="balanceLabel" class="balance-label">Tu balance:</span>
           <span id="tokenBalance" class="balance-value">—</span>
         </div>
         <button id="refreshBalance" class="btn-secondary" disabled>
@@ -51,10 +56,12 @@
         </button>
       </section>
 
-      <section class="card">
-        <h2>Enviar YAL</h2>
+      <section class="card card-full">
+        <div id="transferAlert" class="alert hidden"></div>
+
+        <h2 id="transferTitle">Enviar YAL</h2>
         <form id="transferForm" class="form">
-          <label class="form-label">
+          <label id="toLabel" class="form-label">
             Dirección de destino
             <input
               type="text"
@@ -65,7 +72,7 @@
             />
           </label>
 
-          <label class="form-label">
+          <label id="amountLabel" class="form-label">
             Cantidad de YAL
             <input
               type="number"
@@ -82,13 +89,52 @@
             Enviar tokens
           </button>
         </form>
-        <p id="txStatus" class="tx-status"></p>
       </section>
     </main>
 
     <footer class="footer">
-      <p>Yalibe · Fase 1 — Wallet DApp básica</p>
+      <p id="footerText">Yalibe · Fase 1 — Wallet DApp básica</p>
     </footer>
+  </div>
+
+  <div id="confirmModal" class="modal hidden">
+
+
+
+    <div class="modal-backdrop">
+      <div class="modal-content">
+        <h3 id="modalTitle">Confirmar envío</h3>
+        <div class="modal-row">
+          <span id="modalToLabel" class="label">Dirección de destino</span>
+          <span id="modalToValue" class="value-address"></span>
+        </div>
+        <div class="modal-row">
+          <span id="modalAmountLabel" class="label">Cantidad a enviar</span>
+          <span id="modalAmountValue" class="value"></span>
+        </div>
+        <label class="modal-checkbox">
+          <input type="checkbox" id="modalConfirmCheck" />
+          <span id="modalCheckboxLabel">
+            Confirmo que la información es correcta y deseo continuar.
+          </span>
+        </label>
+        <div class="modal-actions">
+          <button id="modalCancel" class="btn-secondary">Cancelar</button>
+          <button id="modalConfirm" class="btn-primary" disabled>Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="errorModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content modal-content-sm">
+      <h3 id="errorModalTitle">Error</h3>
+      <p id="errorModalMessage"></p>
+      <div class="modal-actions modal-actions-center">
+        <button id="errorModalClose" class="btn-primary">OK</button>
+      </div>
+    </div>
   </div>
 
   <script src="app.js"></script>
